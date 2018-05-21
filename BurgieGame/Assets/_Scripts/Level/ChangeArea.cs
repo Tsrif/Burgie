@@ -9,8 +9,8 @@ public class ChangeArea : MonoBehaviour {
     //disable current camera and enable new camera
     //move character to new location
 
-    public GameObject camera1;
-    public GameObject camera2;
+    //public GameObject camera1;
+    //public GameObject camera2;
 
     public Transform newPos;
    
@@ -23,11 +23,14 @@ public class ChangeArea : MonoBehaviour {
 
     public GameObject Player;
 
+    public GameObject to;
+    public GameObject from;
+
     private void Start()
     {
         currentPos = newPos.position;
-        camera1.GetComponent<Camera>().enabled = true;
-        camera2.GetComponent<Camera>().enabled = false;
+       // camera1.GetComponent<Camera>().enabled = true;
+       // camera2.GetComponent<Camera>().enabled = false;
     }
 
     void swapLocAndCam() {
@@ -35,8 +38,11 @@ public class ChangeArea : MonoBehaviour {
         Vector3 temp = new Vector3(newPos.position.x, newPos.position.y, newPos.position.z);
         Player.transform.position = temp;
 
-        camera1.GetComponent<Camera>().enabled = !camera1.GetComponent<Camera>().enabled;
-        camera2.GetComponent<Camera>().enabled = !camera2.GetComponent<Camera>().enabled;
+        to.SetActive(false);
+        from.SetActive(true);
+
+       // camera1.GetComponent<Camera>().enabled = !camera1.GetComponent<Camera>().enabled;
+       // camera2.GetComponent<Camera>().enabled = !camera2.GetComponent<Camera>().enabled;
 
 
     }
