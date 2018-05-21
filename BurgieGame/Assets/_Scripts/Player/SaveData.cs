@@ -5,7 +5,7 @@ using Sirenix.OdinInspector;
 
 public class SaveData : MonoBehaviour {
     public PlayerSaveInfo _playerSaveInfo;
-    //create a singleton of the deathCounter 
+    //create a singleton of the saveData
     public static SaveData _instance;
 
     private void Awake()

@@ -8,6 +8,7 @@ using Sirenix.OdinInspector;
 public class PlayerSaveInfo : SerializedScriptableObject
 {
     [SerializeField]
+    //Dictionary containing the completed level and the player's best time 
     public Dictionary<string, float> levelAndTime = new Dictionary<string, float>();
     //Death Count?
     public int totalDeaths;
