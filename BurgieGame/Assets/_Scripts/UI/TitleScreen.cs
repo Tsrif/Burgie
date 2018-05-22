@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 //public enum GameState { MENU, MENU_TO_PLAYING, PLAYING, PLAYING_TO_MENU };
 //public enum MenuState { NONE, PAUSE_MENU, CHARACTER, GAME, TITLE_SCREEN };
@@ -16,6 +17,9 @@ public class TitleScreen : MonoBehaviour
     private MenuState _menuState;
     public Text gameStateDisplay;
     public Canvas PauseMenuCanvas;
+    private GameObject storeSelected;
+
+    public EventSystem es;
 
     public GameState gameState
     {
@@ -45,6 +49,40 @@ public class TitleScreen : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        if (es == null)
+        {
+            es = (EventSystem)FindObjectOfType(typeof(EventSystem));
+        }
+        storeSelected = es.firstSelectedGameObject;
+    }
+
+    private void OnEnable()
+    {
+        MenuHandler_Title.firstItemNotif += ChangeSelectedItemMenuChange;
+    }
+
+    private void OnDisable()
+    {
+        MenuHandler_Title.firstItemNotif -= ChangeSelectedItemMenuChange;
+    }
+
+    private void Update()
+    {
+        if (es.firstSelectedGameObject != storeSelected)
+        {
+            if (es.currentSelectedGameObject == null)
+            {
+                es.SetSelectedGameObject(storeSelected);
+            }
+            else
+            {
+                storeSelected = es.currentSelectedGameObject;
+            }
+        }
+    }
+
     public static event Action<MenuState> changeMenu;
 
     public void switchToMainMenu()
@@ -65,11 +103,24 @@ public class TitleScreen : MonoBehaviour
         menuState = newMenu;
 
     }
-    public void QuitGame() {
+    public void QuitGame()
+    {
         Application.Quit();
     }
 
-    public void SwitchToLevelSelctor() {
+    public void SwitchToLevelSelctor()
+    {
         SceneManager.LoadScene("Level Selector", LoadSceneMode.Single);
+    }
+
+    public void DeleteSaveInfo()
+    {
+        SaveData._instance.ClearSave();
+    }
+
+
+    public void ChangeSelectedItemMenuChange(GameObject newItem)
+    {
+        es.SetSelectedGameObject(newItem);
     }
 }

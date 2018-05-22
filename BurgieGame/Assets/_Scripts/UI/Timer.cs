@@ -60,7 +60,7 @@ public class Timer : MonoBehaviour {
         WinScreenTime.text = "Your Time: " + timerText.text;
         Scene scene = SceneManager.GetActiveScene(); //get the current scene
         //send time notification to save data
-        levelTime(scene.name,timer);
+        levelTime(scene.name,timer); //send notification containing scene and player's time 
     }
 
     

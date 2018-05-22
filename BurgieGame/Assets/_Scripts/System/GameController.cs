@@ -5,9 +5,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityStandardAssets._2D;
+using UnityEngine.EventSystems;
 
 public enum GameState {MENU, MENU_TO_PLAYING, PLAYING, PLAYING_TO_MENU, WINNER};
-public enum MenuState {NONE, PAUSE_MENU, CHARACTER, MANAGE, TITLE_SCREEN};
+public enum MenuState {NONE, PAUSE_MENU, CHARACTER, MANAGE, TITLE_SCREEN, END_LEVEL};
 
 
 
@@ -20,6 +21,10 @@ public class GameController : MonoBehaviour {
 
     public Camera2DFollow mainCamera;
     public BurgerController player;
+
+    private GameObject storeSelected;
+
+    public EventSystem es;
 
 
     public GameState gameState {
@@ -51,18 +56,22 @@ public class GameController : MonoBehaviour {
 
     private void Awake()
     {
+        if (es == null)
+        {
+            es = (EventSystem)FindObjectOfType(typeof(EventSystem));
+        }
         //DontDestroyOnLoad(PauseMenuCanvas); 
     }
 
     private void OnEnable()
     {
         EndOfLevel.winner += Winner; //subscribe to event
-
+        MenuHandler.firstItemNotif += ChangeSelectedItemMenuChange;
     }
     private void OnDisable()
     {
         EndOfLevel.winner -= Winner;
-
+        MenuHandler.firstItemNotif -= ChangeSelectedItemMenuChange;
     }
 
     // Use this for initialization
@@ -78,6 +87,17 @@ public class GameController : MonoBehaviour {
             case GameState.MENU:
                 if (Input.GetButtonDown("Pause")) {
                     gameState = GameState.MENU_TO_PLAYING;
+                }
+                if (es.firstSelectedGameObject != storeSelected)
+                {
+                    if (es.currentSelectedGameObject == null)
+                    {
+                        es.SetSelectedGameObject(storeSelected);
+                    }
+                    else
+                    {
+                        storeSelected = es.currentSelectedGameObject;
+                    }
                 }
                 break;
             case GameState.MENU_TO_PLAYING:
@@ -139,6 +159,10 @@ public class GameController : MonoBehaviour {
 
     }
 
+    public void switchToEndLevelMenu() {
+        menuState = MenuState.END_LEVEL;
+    }
+
     public void switchToMenu(MenuState newMenu) {
         menuState = newMenu;
     }
@@ -164,9 +188,15 @@ public class GameController : MonoBehaviour {
 
     private void Winner() {
         gameState = GameState.WINNER; //GameState.WINNER just makes it so you can't open up the pause menu after you've finished a level
+        switchToEndLevelMenu();
     }
 
     public void UnpauseGame() {
         PauseMenuCanvas.enabled = false;
+    }
+
+    public void ChangeSelectedItemMenuChange(GameObject newItem)
+    {
+        es.SetSelectedGameObject(newItem);
     }
 }

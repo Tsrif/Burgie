@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 
+//A single script that handles all the saving in the game
+//Recieves information from other scripts and then does something with it
 public class SaveData : MonoBehaviour {
     public PlayerSaveInfo _playerSaveInfo;
     //create a singleton of the saveData
@@ -46,11 +48,18 @@ public class SaveData : MonoBehaviour {
         ES3.Load<PlayerSaveInfo>("PlayerSaveData", _playerSaveInfo);
     }
 
+    public void ClearSave() {
+        _playerSaveInfo.levelAndTime.Clear();
+        _playerSaveInfo.totalDeaths = 0;
+        _playerSaveInfo.levelTime = "";
+    }
+
     public void addDeath(int count) {
         _playerSaveInfo.totalDeaths += count; 
         SaveGame();
     }
 
+    //Add in the level and the player's current or best time
     public void AddLevelAndTime(string level, float time) {
         //if we have that level key
         if (_playerSaveInfo.levelAndTime.ContainsKey(level))

@@ -10,7 +10,7 @@ public class FollowMenuSelection : MonoBehaviour, IPointerEnterHandler,ISelectHa
     private AudioSource source { get { return GetComponent<AudioSource>(); } }
     private Button button { get { return GetComponent<Button>(); } }
 
-    private void Start()
+    private void Awake()
     {
         gameObject.AddComponent<AudioSource>();
         source.clip = sound;
