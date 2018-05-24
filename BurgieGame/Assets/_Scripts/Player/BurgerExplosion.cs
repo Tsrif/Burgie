@@ -17,6 +17,7 @@ public class BurgerExplosion : MonoBehaviour {
     private BurgerController bc { get { return GetComponent<BurgerController>(); } }
     private Animator anim { get { return GetComponent<Animator>(); } }
     private PolygonCollider2D polyColl { get { return GetComponent<PolygonCollider2D>(); } }
+    private Rigidbody2D rb { get { return GetComponent<Rigidbody2D>(); } }
     int recieved = 0;
 
     private void OnEnable()
@@ -51,6 +52,7 @@ public class BurgerExplosion : MonoBehaviour {
             polyColl.enabled = false; // turn off the collider
             source.Stop(); //stop all current sounds
             source.PlayOneShot(explosion);//play the explosion
+            rb.constraints = RigidbodyConstraints2D.FreezeAll; //freeze rigidbody position so it doesn't fall through the map
             turnOnLetters();
            
         }       

@@ -70,6 +70,8 @@ public class TitleScreen : MonoBehaviour
 
     private void Update()
     {
+        //Resets the currently selected gameobject on the event system
+        //if null, menu options change, or player clicks out of window 
         if (es.firstSelectedGameObject != storeSelected)
         {
             if (es.currentSelectedGameObject == null)
