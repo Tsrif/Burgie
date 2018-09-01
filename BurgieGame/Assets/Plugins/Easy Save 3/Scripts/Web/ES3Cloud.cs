@@ -386,6 +386,80 @@ public class ES3Cloud : ES3WebClass
 
 	#endregion
 
+	#region RenameFile
+
+	/// <summary>Renames a file from the server. An error is *not* returned if the file does not exist.</summary>
+	/// <param name="filePath">The relative or absolute path of the file we want to delete.</param>
+	public IEnumerator RenameFile(string filePath, string newFilePath)
+	{
+		return RenameFile(new ES3Settings(filePath), new ES3Settings(newFilePath), "", "");
+	}
+
+	/// <summary>Renames a file from the server. An error is *not* returned if the file does not exist.</summary>
+	/// <param name="filePath">The relative or absolute path of the file we want to delete.</param>
+	/// <param name="user">The unique name of the user this file belongs to, if the file isn't globally accessible.</param>
+	public IEnumerator RenameFile(string filePath, string newFilePath, string user)
+	{
+		return RenameFile(new ES3Settings(filePath), new ES3Settings(newFilePath), user, "");
+	}
+
+	/// <summary>Renames a file from the server. An error is *not* returned if the file does not exist.</summary>
+	/// <param name="filePath">The relative or absolute path of the file we want to delete.</param>
+	/// <param name="user">The unique name of the user this file belongs to, if the file isn't globally accessible.</param>
+	/// <param name="password">The password of the user this file belongs to.</param>
+	public IEnumerator RenameFile(string filePath, string newFilePath, string user, string password)
+	{
+		return RenameFile(new ES3Settings(filePath), new ES3Settings(newFilePath), user, password);
+	}
+
+	/// <summary>Renames a file from the server. An error is *not* returned if the file does not exist.</summary>
+	/// <param name="filePath">The relative or absolute path of the file we want to delete.</param>
+	/// <param name="settings">The settings we want to use to override the default settings.</param>
+	public IEnumerator RenameFile(string filePath, string newFilePath, ES3Settings settings)
+	{
+		return RenameFile(new ES3Settings(filePath, settings), new ES3Settings(newFilePath, settings), "", "");
+	}
+
+	/// <summary>Renames a file from the server. An error is *not* returned if the file does not exist.</summary>
+	/// <param name="filePath">The relative or absolute path of the file we want to delete.</param>
+	/// <param name="user">The unique name of the user this file belongs to, if the file isn't globally accessible.</param>
+	/// <param name="settings">The settings we want to use to override the default settings.</param>
+	public IEnumerator RenameFile(string filePath, string newFilePath, string user, ES3Settings settings)
+	{
+		return RenameFile(new ES3Settings(filePath, settings), new ES3Settings(newFilePath, settings), user, "");
+	}
+
+	/// <summary>Renames a file from the server. An error is *not* returned if the file does not exist.</summary>
+	/// <param name="filePath">The relative or absolute path of the file we want to delete.</param>
+	/// <param name="user">The unique name of the user this file belongs to, if the file isn't globally accessible.</param>
+	/// <param name="password">The password of the user this file belongs to.</param>
+	/// <param name="settings">The settings we want to use to override the default settings.</param>
+	public IEnumerator RenameFile(string filePath, string newFilePath, string user, string password, ES3Settings settings)
+	{
+		return RenameFile(new ES3Settings(filePath, settings), new ES3Settings(newFilePath, settings), user, password);
+	}
+
+	private IEnumerator RenameFile(ES3Settings settings, ES3Settings newSettings, string user, string password)
+	{
+		Reset();
+
+		var form = CreateWWWForm();
+		form.AddField("apiKey",  apiKey);
+		form.AddField("renameFile", settings.path);
+		form.AddField("newFilename", newSettings.path);
+		form.AddField("user", GetUser(user, password));
+
+		using(var webRequest = UnityWebRequest.Post(url, form))
+		{
+			yield return SendWebRequest(webRequest);
+			HandleError(webRequest, true);
+		}
+
+		isDone = true;
+	}
+
+	#endregion
+
 	#region DownloadFilenames
 
 	/// <summary>Downloads the names of all of the files on the server. Downloaded filenames are stored in the 'filenames' variable of the ES3Cloud object.</summary>

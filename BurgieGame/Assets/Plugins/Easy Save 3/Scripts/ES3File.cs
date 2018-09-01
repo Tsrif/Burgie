@@ -76,6 +76,11 @@ public class ES3File
 
 	/// <summary>Creates a new ES3File and loads the bytes into the ES3File. Note the bytes must represent that of a file.</summary>
 	/// <param name="bytes">The bytes representing our file.</param>
+	/// <param name="syncWithFile">Whether we should sync this ES3File with the one in storage immediately after creating it.</param>
+	public ES3File(byte[] bytes, bool syncWithFile) : this(bytes, new ES3Settings(), syncWithFile){}
+
+	/// <summary>Creates a new ES3File and loads the bytes into the ES3File. Note the bytes must represent that of a file.</summary>
+	/// <param name="bytes">The bytes representing our file.</param>
 	/// <param name="settings">The settings we want to use to override the default settings.</param>
 	/// <param name="syncWithFile">Whether we should sync this ES3File with the one in storage immediately after creating it.</param>
 	public ES3File(byte[] bytes, ES3Settings settings, bool syncWithFile)
@@ -177,6 +182,26 @@ public class ES3File
 			cache[key] = new ES3Data(es3Type, stream.ToArray());
 		}
 	}
+
+	/// <summary>Saves a value to a key in this ES3File.</summary>
+	/// <param name="type">The type we want to use for the header, and to get the ES3Type.</param>
+	/// <param name="key">The key we want to use to identify our value in the file.</param>
+	/// <param name="value">The value we want to save.</param>
+	[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+	public void Save(string key, object value)
+	{
+		using(var stream = new MemoryStream(settings.bufferSize))
+		{
+			var unencryptedSettings = (ES3Settings)settings.Clone();
+			unencryptedSettings.encryptionType = ES3.EncryptionType.None;
+			var es3Type = ES3TypeMgr.GetOrCreateES3Type(value.GetType());
+
+			using (var baseWriter = ES3Writer.Create(stream, unencryptedSettings, false, false))
+				baseWriter.Write(value, es3Type);
+
+			cache[key] = new ES3Data(es3Type, stream.ToArray());
+		}
+	}
 	
 	#endregion
 	
@@ -245,10 +270,12 @@ public class ES3File
 	{
 		if(cache.Count == 0)
 			return new byte[0];
-		
+
 		using (var ms = new System.IO.MemoryStream ())
 		{
-			using (var baseWriter = ES3Writer.Create(ms, settings, false, false))
+			var memorySettings = (ES3Settings)settings.Clone();
+			memorySettings.location = ES3.Location.Memory;
+			using (var baseWriter = ES3Writer.Create(ms, memorySettings, true, false))
 			{
 				foreach (var kvp in cache)
 					baseWriter.Write(kvp.Key, kvp.Value.type.type, kvp.Value.bytes);
@@ -292,6 +319,15 @@ public class ES3File
 		foreach(var kvp in cache)
 			size += kvp.Value.bytes.Length;
 		return size;
+	}
+
+	public Type GetKeyType(string key)
+	{
+		ES3Data es3data;
+		if(!cache.TryGetValue(key, out es3data))
+			throw new KeyNotFoundException("Key \"" + key + "\" was not found in this ES3File. Use Load<T>(key, defaultValue) if you want to return a default value if the key does not exist.");
+		
+		return es3data.type.type;
 	}
 	
 	#endregion

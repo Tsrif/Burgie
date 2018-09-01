@@ -78,6 +78,10 @@ public class ES3Spreadsheet
 	{
 		using (var writer = new StreamWriter(ES3Stream.CreateStream(settings, append ? ES3FileMode.Append : ES3FileMode.Write)))
 		{
+			// If data already exists and we're appending, we need to prepend a newline.
+			if(append && ES3.FileExists(settings))
+				writer.Write('\n');
+
 			var array = ToArray();
 			for(int row = 0; row < rows; row++)
 			{
@@ -92,7 +96,8 @@ public class ES3Spreadsheet
 				}
 			}
 		}
-		ES3IO.CommitBackup(settings);
+		if(!append)
+			ES3IO.CommitBackup(settings);
 	}
 
 	private static string Escape(string str)

@@ -640,7 +640,7 @@ namespace ES3PlayMaker
 	}
 
 	[ActionCategory("Easy Save 3")]
-	[Tooltip("Gets an array of key names from a file.")]
+	[Tooltip("Gets how many keys are in a file.")]
 	public class GetKeyCount : SettingsAction
 	{
 		[Tooltip("The relative or absolute path of the file we want to count the keys of.")]
@@ -1023,7 +1023,7 @@ namespace ES3PlayMaker
 		public override void Enter()
 		{
 			var settings = GetSettings();
-			StartCoroutine(cloud.Sync(settings.path, user.Value, password.Value, settings));
+			StartCoroutine(cloud.Sync(path.Value, user.Value, password.Value, settings));
 		}
 	}
 
@@ -1035,7 +1035,7 @@ namespace ES3PlayMaker
 		{
 			base.Enter();
 			var settings = GetSettings();
-			StartCoroutine(cloud.Sync(settings.path, settings));
+			StartCoroutine(cloud.Sync(path.Value, settings));
 		}
 	}
 
@@ -1047,7 +1047,7 @@ namespace ES3PlayMaker
 		{
 			base.Enter();
 			var settings = GetSettings();
-			StartCoroutine(cloud.UploadFile(settings.path, user.Value, password.Value, settings));
+			StartCoroutine(cloud.UploadFile(path.Value, user.Value, password.Value, settings));
 		}
 	}
 
@@ -1059,7 +1059,7 @@ namespace ES3PlayMaker
 		{
 			base.Enter();
 			var settings = GetSettings();
-			StartCoroutine(cloud.DownloadFile(settings.path, user.Value, password.Value, settings));
+			StartCoroutine(cloud.DownloadFile(path.Value, user.Value, password.Value, settings));
 		}
 	}
 
@@ -1071,7 +1071,22 @@ namespace ES3PlayMaker
 		{
 			base.Enter();
 			var settings = GetSettings();
-			StartCoroutine(cloud.DeleteFile(settings.path, user.Value, password.Value, settings));
+			StartCoroutine(cloud.DeleteFile(path.Value, user.Value, password.Value, settings));
+		}
+	}
+
+	[ActionCategory("Easy Save 3")]
+	[Tooltip("Renames a file on the server, overwriting any existing files, or returning error code 3 if no file exists on the server.")]
+	public class ES3CloudRenameFile : ES3CloudUserAction
+	{
+		[Tooltip("The name we want to rename the file to.")]
+		public FsmString newFilename;
+
+		public override void Enter()
+		{
+			base.Enter();
+			var settings = GetSettings();
+			StartCoroutine(cloud.RenameFile(path.Value, newFilename.Value, user.Value, password.Value, settings));
 		}
 	}
 

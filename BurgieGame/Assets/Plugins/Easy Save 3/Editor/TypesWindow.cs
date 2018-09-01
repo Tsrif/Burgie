@@ -637,7 +637,10 @@ namespace ES3Editor
 			// If it's a generic type, replace syntax with angled brackets.
 			int genericArgumentCount = type.GetGenericArguments().Length;
 			if(genericArgumentCount > 0)
-				typeName = typeName.Replace("`"+genericArgumentCount+"[","<").Replace("]",">");
+			{
+				typeName = typeName.Replace("`" + genericArgumentCount + "[", "<");
+				typeName = typeName.Remove(typeName.Length-1, 1) + ">";
+			}
 
 			return typeName;
 		}

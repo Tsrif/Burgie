@@ -128,8 +128,7 @@ public static class ES3
 	public static void SaveRaw(string str, ES3Settings settings)
 	{
 		var bytes = settings.encoding.GetBytes(str);
-		using(var stream = ES3Stream.CreateStream(settings, ES3FileMode.Write))
-			stream.Write(bytes, 0, bytes.Length);
+		SaveRaw(bytes, settings);
 	}
 
 	/// <summary>Creates or appends the specified bytes to a file.</summary>
@@ -357,9 +356,14 @@ public static class ES3
 
 	#region Other ES3.Load Methods
 
+	/// <summary>Loads the default file as a byte array.</summary>
+	public static byte[] LoadRawBytes()
+	{
+		return LoadRawBytes(new ES3Settings());
+	}
+
 	/// <summary>Loads a file as a byte array.</summary>
 	/// <param name="filePath">The relative or absolute path of the file we want to load as a byte array.</param>
-	/// <param name="settings">The settings we want to use to override the default settings.</param>
 	public static byte[] LoadRawBytes(string filePath)
 	{
 		return LoadRawBytes(new ES3Settings(filePath));
@@ -377,7 +381,14 @@ public static class ES3
 	/// <param name="settings">The settings we want to use to override the default settings.</param>
 	public static byte[] LoadRawBytes(ES3Settings settings)
 	{
-		if(settings.location == Location.File)
+		using (var stream = ES3Stream.CreateStream(settings, ES3FileMode.Read))
+		{
+			var bytes = new byte[stream.Length];
+			stream.Read(bytes, 0, bytes.Length);
+			return bytes;
+		}
+
+		/*if(settings.location == Location.File)
 			return ES3IO.ReadAllBytes(settings.FullPath);
 		else if(settings.location == Location.PlayerPrefs)
 			return System.Convert.FromBase64String(PlayerPrefs.GetString(settings.FullPath));
@@ -386,7 +397,13 @@ public static class ES3
 			var textAsset = Resources.Load<TextAsset>(settings.FullPath);
 			return textAsset.bytes;
 		}
-		return null;
+		return null;*/
+	}
+
+	/// <summary>Loads the default file as a byte array.</summary>
+	public static string LoadRawString()
+	{
+		return LoadRawString(new ES3Settings());
 	}
 
 	/// <summary>Loads a file as a byte array.</summary>
@@ -657,10 +674,13 @@ public static class ES3
 		if(settings.location == Location.Resources)
 			throw new System.NotSupportedException("Modifying files in Resources is not allowed.");
 
-		using(var writer = ES3Writer.Create(settings))
-		{
-			writer.MarkKeyForDeletion(key);
-			writer.Save();
+		if(ES3.FileExists(settings))
+		{	
+			using (var writer = ES3Writer.Create(settings))
+			{
+				writer.MarkKeyForDeletion(key);
+				writer.Save();
+			}
 		}
 	}
 
@@ -823,7 +843,7 @@ public static class ES3
 	/// <param name="settings">The settings we want to use to override the default settings.</param>
 	public static string[] GetFiles(string directoryPath, ES3Settings settings)
 	{
-		return GetKeys(new ES3Settings(directoryPath, settings));
+		return GetFiles(new ES3Settings(directoryPath, settings));
 	}
 
 	/// <summary>Gets an array of all of the file names in a directory.</summary>
