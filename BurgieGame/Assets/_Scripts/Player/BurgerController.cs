@@ -26,6 +26,8 @@ public class BurgerController: MonoBehaviour
     [FoldoutGroup("Movement")]
     public Vector3 originalPosition;
 
+ 
+
     [FoldoutGroup("Bools")]
     public bool facingRight;
     [FoldoutGroup("Bools")]
@@ -69,10 +71,15 @@ public class BurgerController: MonoBehaviour
     public PlayerState _playerState;
 
     /*PRIVATE VARIABLES */
-    private float move;
-    private bool jumpInput;
-    private bool parachuteInput;
-    private bool paused;
+
+    [FoldoutGroup("Inputs")]
+    public float move;
+    [FoldoutGroup("Inputs")]
+    public bool jumpInput;
+    [FoldoutGroup("Inputs")]
+    public bool parachuteInput;
+    [FoldoutGroup("Inputs")]
+    public bool paused;
 
     private AudioSource source { get { return GetComponent<AudioSource>(); } }
 
@@ -119,22 +126,14 @@ public class BurgerController: MonoBehaviour
         //check horizontal
         move = Input.GetAxis("Horizontal"); // get movement direction 
         //check jump
-        if (Input.GetButtonDown("Jump"))
+        if (!jumpInput) { jumpInput = Input.GetButtonDown("Jump"); }
+        //Only check for parachute input when we are in the air
+        if (_playerState == PlayerState.IN_AIR)
         {
-            jumpInput = true;
-        }
-        else
-        {
-            jumpInput = false;
-        }
-        //check parachute
-        if (Input.GetButtonDown("Parachute"))
-        {
-            parachuteInput = true;
-        }
-        else
-        {
-            parachuteInput = false;
+            if (!parachuteInput)
+            {
+                parachuteInput = Input.GetButtonDown("Parachute");
+            }
         }
     }
 
@@ -154,9 +153,9 @@ public class BurgerController: MonoBehaviour
 
         ControlPlayer();        
     }
-   
 
-    void ControlPlayer() {
+    void ControlPlayer()
+    {
         //Draws a circle below Burgie and checks whether the circle is hitting the "ground"
         //grounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, whatIsGround);
         grounded = Physics2D.OverlapBox(groundCheck.position, boxSizeGround, 0, whatIsGround);
@@ -190,6 +189,7 @@ public class BurgerController: MonoBehaviour
                 break;
 
             case PlayerState.JUMPING:
+                jumpInput = false;
                 animator.SetInteger("AnimState", (int)_playerState);
                 //apply jump force to character
                 rb.AddForce(new Vector2(move, jumpForce), ForceMode2D.Impulse);
@@ -198,7 +198,9 @@ public class BurgerController: MonoBehaviour
                 break;
 
             case PlayerState.PARACHUTE:
-                if (!parachute.activeSelf) {
+                parachuteInput = false;
+                if (!parachute.activeSelf)
+                {
                     animator.SetInteger("AnimState", (int)_playerState);
                     parachute.SetActive(true);
                     //lower mass and increase drag to float down slower
@@ -238,6 +240,7 @@ public class BurgerController: MonoBehaviour
                 break;
 
             case PlayerState.DOUBLEJUMP:
+                jumpInput = false;
                 animator.SetInteger("AnimState", (int)_playerState);
                 if (doubleJump == false)
                 {
@@ -264,7 +267,7 @@ public class BurgerController: MonoBehaviour
                 }
 
                 //if we press the parachute button then deploy parachute
-                if (parachuteInput){_playerState = PlayerState.PARACHUTE;}
+                if (parachuteInput) { _playerState = PlayerState.PARACHUTE; }
                 //if we become grounded set state to on ground 
                 if (grounded) { resetCharacter(); source.PlayOneShot(sounds[0]); _playerState = PlayerState.IDLE; }//reset character, play ground impact sound, set to idle
                 //if we become walled set state to on wall                                                                                              
@@ -272,12 +275,15 @@ public class BurgerController: MonoBehaviour
                 break;
 
             case PlayerState.WALL_JUMP:
+                jumpInput = false;
                 animator.SetInteger("AnimState", (int)_playerState);
                 //technically the character is facing right but it's backwards when on a wall because of the animation
-                if (!facingRight) {
+                if (!facingRight)
+                {
                     rb.AddForce(new Vector2((1) * walljumpForce, (float)wallJumpHeight)); //pushed off a wall - right
                 }
-                else {
+                else
+                {
                     rb.AddForce(new Vector2((-1) * walljumpForce, (float)wallJumpHeight)); //pushed off a wall - left
                 }
                 //set state to free falling 
@@ -288,9 +294,7 @@ public class BurgerController: MonoBehaviour
                 break;
         }
     }
-    
-    
-    
+
     //Changes animation to sliding down wall
     private void OnCollisionEnter2D(Collision2D col)
     {
